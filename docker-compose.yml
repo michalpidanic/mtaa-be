@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # dev:
+  #   container_name: mtaa_be_dev
+  #   image: mtaa-be-dev:1.0.0
+  #   build:
+  #     context: .
+  #     target: development
+  #     dockerfile: ./Dockerfile
+  #   command: npm run start:dev
+  #   ports:
+  #     - 3000:3000
+
+  # prod:
+  #   container_name: mtaa_be_prod
+  #   image: mtaa-be-prod:1.0.0
+  #   build:
+  #     context: .
+  #     target: production
+  #     dockerfile: ./Dockerfile
+  #   command: npm run start:prod
+  #   ports:
+  #     - 3000:3000
+
+  # redis:
+  #   image: redis
+  #   container_name: redis
+  #   ports:
+  #     - 6379:6379
+
+  db:
+    image: postgres:14.1
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-q', '-d', 'postgres', '-U', 'root']
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
