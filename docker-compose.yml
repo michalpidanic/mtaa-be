@@ -23,14 +23,15 @@ services:
   #   ports:
   #     - 3000:3000
 
-  # redis:
-  #   image: redis
-  #   container_name: redis
-  #   ports:
-  #     - 6379:6379
+  mtaa-redis:
+    image: redis
+    container_name: mataa-redis
+    ports:
+      - 6379:6379
 
-  db:
+  mataa-db:
     image: postgres:14.1
+    container_name: mataa-db
     healthcheck:
       test: ['CMD', 'pg_isready', '-q', '-d', 'postgres', '-U', 'root']
       timeout: 45s
@@ -42,6 +43,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - ./mtaa-data/db:/var/lib/postgresql/data
     ports:
       - 5432:5432
