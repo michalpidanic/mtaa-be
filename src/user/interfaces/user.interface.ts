@@ -13,6 +13,9 @@ export interface UserEntityInterface {
   lastName: string;
   passwordHash: string;
   email: string;
+  messageNotifications: boolean;
+  callNotifications: boolean;
+  mentionNotifications: boolean;
   lastSeen: Date;
   createdAt: Date;
   updatedAt: Date;

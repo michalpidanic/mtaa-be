@@ -40,6 +40,6 @@ export class UserController {
   changeNotificationSettings(@Body() notifications: NotificationsDto, @Req() req)
   {
     const userId = req.user.userId
-    this.userService.changeNotificationSettings(notifications, userId)
+    return this.userService.changeNotificationSettings(notifications, userId)
   }
 }
