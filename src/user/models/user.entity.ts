@@ -20,6 +20,15 @@ export class UserEntity {
   @Column({ unique: true })
   email: string;
 
+  @Column( "boolean", { default: true })
+  messageNotifications: boolean;
+
+  @Column( "boolean", { default: true })
+  callNotifications: boolean;
+
+  @Column( "boolean", { default: true })
+  mentionNotifications: boolean;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   lastSeen: Date;
 

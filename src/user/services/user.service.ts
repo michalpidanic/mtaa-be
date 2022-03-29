@@ -4,7 +4,7 @@ import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { catchError, from, map, throwError } from 'rxjs';
 import { mapUserWithoutPasswordHash } from 'src/common/utils/user-mapper';
 import { Repository } from 'typeorm';
-import { NewUserInterface } from '../interfaces/user.interface';
+import { NewUserInterface, UserNotificationsInterface } from '../interfaces/user.interface';
 import { UserEntity } from '../models/user.entity';
 
 @Injectable()
@@ -36,6 +36,11 @@ export class UserService {
     return from(this.userRepository.findOne({ where: { id: id } })).pipe(
       mapUserWithoutPasswordHash(),
     );
+  }
+
+  public changeNotificationSettings(notifications: UserNotificationsInterface, userId)
+  {
+
   }
 
   // method paginates users and returns without passwordHash

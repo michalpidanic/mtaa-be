@@ -18,3 +18,9 @@ export interface UserEntityInterface {
   updatedAt: Date;
   deletedAt: Date;
 }
+
+export interface UserNotificationsInterface {
+  callNotifications: boolean;
+  messageNotifications: boolean;
+  mentionNotifications: boolean;
+}
