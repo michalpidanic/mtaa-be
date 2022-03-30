@@ -35,11 +35,11 @@ export class MessageEntity {
   @DeleteDateColumn({ type: 'timestamp', default: null })
   deletedAt: Date;
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { eager: true })
   @JoinColumn({ name: 'senderId' })
   sender: UserEntity;
 
-  @ManyToOne(() => ChatEntity)
+  @ManyToOne(() => ChatEntity, { eager: true })
   @JoinColumn({ name: 'chatId' })
   chat: ChatEntity;
 }

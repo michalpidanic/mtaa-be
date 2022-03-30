@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { forkJoin, from, of, switchMap } from 'rxjs';
+import { forkJoin, from, map, of, switchMap } from 'rxjs';
 import { UserService } from 'src/user/services/user.service';
 import { Repository } from 'typeorm';
 import { ChatEntity } from '../models/chat.entity';
@@ -34,11 +34,17 @@ export class MemberService {
     );
   }
 
-  public findChatMember(chatId: number, userId: number) {
+  public checkMemberShip(chatId: number, userId: number) {
     return from(
       this.memberRepository.findOne({
         where: { chat: chatId, user: userId },
         relations: ['chat', 'user'],
+      }),
+    ).pipe(
+      map((member) => {
+        if (member == undefined) {
+          throw new UnauthorizedException('Not a member of this chat');
+        }
       }),
     );
   }

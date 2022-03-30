@@ -1,4 +1,4 @@
-import { UserEntity } from 'src/user/models/user.entity';
+import { MessageEntity } from 'src/chat/models/message.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,18 +9,23 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ChatEntity } from './chat.entity';
 
-@Entity('member')
-export class MemberEntity {
+@Entity('file')
+export class FileEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  isAdmin: boolean;
+  originalName: string;
 
-  @Column({ type: 'timestamp', default: null })
-  lastRead: Date;
+  @Column()
+  fileName: string;
+
+  @Column()
+  path: string;
+
+  @Column()
+  mimeType: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
@@ -35,11 +40,7 @@ export class MemberEntity {
   @DeleteDateColumn({ type: 'timestamp', default: null })
   deletedAt: Date;
 
-  @ManyToOne(() => ChatEntity, { eager: true })
-  @JoinColumn({ name: 'chatId' })
-  chat: ChatEntity;
-
-  @ManyToOne(() => UserEntity, { eager: true })
-  @JoinColumn({ name: 'userId' })
-  user: UserEntity;
+  @ManyToOne(() => MessageEntity, { eager: true })
+  @JoinColumn({ name: 'messageId' })
+  message: MessageEntity;
 }

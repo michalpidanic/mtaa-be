@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { concatMap, from, map } from 'rxjs';
 import { UserService } from 'src/user/services/user.service';
 import { Repository } from 'typeorm';
@@ -26,18 +27,15 @@ export class MessageService {
     newMessage.text = messageData.text;
     newMessage.mentions = messageData.mentions;
 
-    return this.memberService.findChatMember(senderId, messageData.chatId).pipe(
-      map((member) => {
-        if (member == undefined) {
-          throw new UnauthorizedException('Not a member of this chat');
-        }
-      }),
-      concatMap(() => this.userService.findOne(senderId)),
-      map((user) => (newMessage.sender = user)),
-      concatMap(() => this.chatService.findOne(messageData.chatId)),
-      map((chat) => (newMessage.chat = chat)),
-      concatMap(() => from(this.messageRepository.save(newMessage))),
-    );
+    return this.memberService
+      .checkMemberShip(messageData.chatId, senderId)
+      .pipe(
+        concatMap(() => this.userService.findOne(senderId)),
+        map((user) => (newMessage.sender = user)),
+        concatMap(() => this.chatService.findOne(messageData.chatId)),
+        map((chat) => (newMessage.chat = chat)),
+        concatMap(() => from(this.messageRepository.save(newMessage))),
+      );
   }
 
   public editMessage(
@@ -63,7 +61,24 @@ export class MessageService {
     );
   }
 
-  private checkOwnership(messageId: number, userId: number) {
+  public fetchMessages(
+    chatId: number,
+    userId: number,
+    options: IPaginationOptions,
+  ) {
+    return this.memberService.checkMemberShip(chatId, userId).pipe(
+      concatMap(() =>
+        from(
+          paginate<MessageEntity>(this.messageRepository, options, {
+            relations: ['chat'],
+            where: { chat: chatId },
+          }),
+        ),
+      ),
+    );
+  }
+
+  public checkOwnership(messageId: number, userId: number) {
     return from(
       this.messageRepository.findOne({
         where: { id: messageId, sender: userId },
@@ -76,5 +91,9 @@ export class MessageService {
         }
       }),
     );
+  }
+
+  public findOne(messageId: number) {
+    return from(this.messageRepository.findOne({ where: { id: messageId } }));
   }
 }

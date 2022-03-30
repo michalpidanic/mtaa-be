@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { UserModule } from './user/user.module';
 import { ChatModule } from './chat/chat.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ChatModule } from './chat/chat.module';
     RedisModule,
     UserModule,
     ChatModule,
+    FileModule,
   ],
 })
 export class AppModule {}
