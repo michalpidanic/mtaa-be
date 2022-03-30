@@ -22,6 +22,7 @@ import { ChatModule } from './chat/chat.module';
         database: configService.get<string>('POSTGRES_DATABASE'),
         autoLoadEntities: true,
         synchronize: true,
+        logging: true,
       }),
       inject: [ConfigService],
     }),

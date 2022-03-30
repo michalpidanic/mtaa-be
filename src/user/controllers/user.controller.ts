@@ -4,7 +4,7 @@ import {
   DefaultValuePipe,
   Get,
   ParseIntPipe,
-  Post,
+  Patch,
   Query,
   Req,
   UseGuards,
@@ -36,10 +36,12 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post("notifications")
-  changeNotificationSettings(@Body() notifications: NotificationsDto, @Req() req)
-  {
-    const userId = req.user.userId
-    return this.userService.changeNotificationSettings(notifications, userId)
+  @Patch('notifications')
+  changeNotificationSettings(
+    @Body() notifications: NotificationsDto,
+    @Req() req,
+  ) {
+    const userId = req.user.userId;
+    return this.userService.changeNotificationSettings(notifications, userId);
   }
 }

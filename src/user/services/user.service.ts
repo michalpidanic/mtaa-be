@@ -1,11 +1,13 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
-import { catchError, from, map, throwError, lastValueFrom } from 'rxjs';
-import { MemberEntity } from 'src/chat/models/member.entity';
+import { catchError, from, map, throwError } from 'rxjs';
 import { mapUserWithoutPasswordHash } from 'src/common/utils/user-mapper';
 import { Repository } from 'typeorm';
-import { NewUserInterface, UserEntityInterface, UserNotificationsInterface } from '../interfaces/user.interface';
+import {
+  NewUserInterface,
+  UserNotificationsInterface,
+} from '../interfaces/user.interface';
 import { UserEntity } from '../models/user.entity';
 
 @Injectable()
@@ -34,19 +36,26 @@ export class UserService {
 
   // method finds user by id and returns
   public findUserById(id: number) {
-    return from(this.userRepository.findOne({ where: { id: id } })).pipe(
-      mapUserWithoutPasswordHash(),
-    );
+    return this.findOne(id).pipe(mapUserWithoutPasswordHash());
   }
 
-  public changeNotificationSettings(notifications: UserNotificationsInterface, userId)
-  {
-    const updatedUser = new UserEntity();
-    updatedUser.messageNotifications = notifications.messageNotifications;
-    updatedUser.callNotifications = notifications.callNotifications;
-    updatedUser.mentionNotifications = notifications.mentionNotifications;
-    updatedUser.updatedAt = new Date();
-    return this.userRepository.update(userId, updatedUser);
+  // method updates users notifications settings
+  public changeNotificationSettings(
+    notifications: UserNotificationsInterface,
+    userId,
+  ) {
+    return from(
+      this.userRepository
+        .createQueryBuilder()
+        .update(UserEntity)
+        .where({ id: userId })
+        .set({
+          messageNotifications: notifications.messageNotifications,
+          mentionNotifications: notifications.mentionNotifications,
+          callNotifications: notifications.callNotifications,
+        })
+        .execute(),
+    );
   }
 
   // method paginates users and returns without passwordHash
@@ -62,15 +71,8 @@ export class UserService {
     );
   }
 
-  public async addChatMembership(member: MemberEntity, userId: number) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    user.addChatMembership(member);
-    return await this.userRepository.save(user);
-    // return from(this.userRepository.findOne({ where: { id: userId } })).pipe(
-    //   tap((user) => console.log(user)),
-    //   tap((user) => user.addChatMembership(member)),
-    //   switchMap(async (user) => await this.userRepository.save(user)),
-    //   tap((user) => console.log(user)),
-    // );
+  // method finds user by id and returns entity
+  public findOne(userId: number) {
+    return from(this.userRepository.findOne({ where: { id: userId } }));
   }
 }

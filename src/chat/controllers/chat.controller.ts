@@ -1,6 +1,5 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { from } from 'rxjs';
 import { NewChatDto } from '../dtos/chat.dto';
 import { ChatService } from '../services/chat.service';
 

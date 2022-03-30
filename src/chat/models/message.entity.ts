@@ -1,15 +1,17 @@
 import { UserEntity } from 'src/user/models/user.entity';
 import {
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ChatEntity } from './chat.entity';
 
-@Entity('meessage')
+@Entity('message')
 export class MessageEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -20,25 +22,24 @@ export class MessageEntity {
   @Column()
   mentions: string;
 
-  @Column({ type: 'timestamp', default: null })
-  lastRead: Date;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
   updatedAt: Date;
 
-  @Column({ type: 'timestamp', default: null })
+  @DeleteDateColumn({ type: 'timestamp', default: null })
   deletedAt: Date;
 
-  @OneToOne((type) => UserEntity)
-  @JoinColumn()
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: 'senderId' })
   sender: UserEntity;
 
-  @ManyToOne((type) => ChatEntity, (chat) => chat.messages, {
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => ChatEntity)
+  @JoinColumn({ name: 'chatId' })
   chat: ChatEntity;
 }

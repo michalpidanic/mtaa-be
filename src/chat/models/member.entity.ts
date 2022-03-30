@@ -1,5 +1,14 @@
 import { UserEntity } from 'src/user/models/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ChatEntity } from './chat.entity';
 
 @Entity('member')
@@ -13,18 +22,24 @@ export class MemberEntity {
   @Column({ type: 'timestamp', default: null })
   lastRead: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
   updatedAt: Date;
 
-  @Column({ type: 'timestamp', default: null })
+  @DeleteDateColumn({ type: 'timestamp', default: null })
   deletedAt: Date;
 
-  @ManyToOne((type) => ChatEntity, (chat) => chat.members)
+  @ManyToOne(() => ChatEntity)
+  @JoinColumn({ name: 'chatId' })
   chat: ChatEntity;
 
-  @ManyToOne((type) => UserEntity, (user) => user.memberInChats)
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: 'userId' })
   user: UserEntity;
 }

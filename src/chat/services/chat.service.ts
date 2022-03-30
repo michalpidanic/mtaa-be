@@ -1,10 +1,9 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { catchError, from, identity, switchMap, tap, throwError } from 'rxjs';
+import { concatMap, from } from 'rxjs';
 import { Repository } from 'typeorm';
 import { NewChatInterface } from '../interfaces/chat.interface';
 import { ChatEntity } from '../models/chat.entity';
-import { MemberEntity } from '../models/member.entity';
 import { MemberService } from './member.service';
 
 @Injectable()
@@ -15,28 +14,17 @@ export class ChatService {
     private readonly memberService: MemberService,
   ) {}
 
-  public async createChat(creatorId: number, chatData: NewChatInterface) {
+  public createChat(adminId: number, chatData: NewChatInterface) {
     const newChat = new ChatEntity();
     newChat.name = chatData.name;
-
-    for (const userId of chatData.membersId) {
-      const member = await this.memberService.createMember(userId, true);
-      await this.addMember(member, newChat);
-    }
-
-    // return chatData.membersId.forEach((memberId) => {
-    //   return this.memberService
-    //     .createMember(memberId, memberId === creatorId)
-    //     .pipe(
-    //       tap((res) => console.log(res)),
-    //       switchMap(async (member) => await this.addMember(member, newChat)),
-    //     );
-    // });
+    return from(this.chatRepository.save(newChat)).pipe(
+      concatMap((chat) => {
+        return this.memberService.addMembers(chatData.membersId, adminId, chat);
+      }),
+    );
   }
 
-  private async addMember(member: MemberEntity, chat: ChatEntity) {
-    console.log(chat, member);
-    chat.addMember(member);
-    await this.chatRepository.save(chat);
+  public findOne(chatId: number) {
+    return from(this.chatRepository.findOne({ where: { id: chatId } }));
   }
 }

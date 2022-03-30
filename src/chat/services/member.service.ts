@@ -1,15 +1,45 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { forkJoin, from, of, switchMap } from 'rxjs';
 import { UserService } from 'src/user/services/user.service';
+import { Repository } from 'typeorm';
+import { ChatEntity } from '../models/chat.entity';
 import { MemberEntity } from '../models/member.entity';
 
 @Injectable()
 export class MemberService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    @InjectRepository(MemberEntity)
+    private readonly memberRepository: Repository<MemberEntity>,
+    private readonly userService: UserService,
+  ) {}
 
-  public async createMember(userId: number, isAdmin: boolean) {
-    const newMember = new MemberEntity();
-    newMember.isAdmin = isAdmin;
-    await this.userService.addChatMembership(newMember, userId);
-    return newMember;
+  public addMembers(membersId: number[], adminId: number, chat: ChatEntity) {
+    return of(membersId).pipe(
+      switchMap((ids) => {
+        const obs = ids.map((id) => this.userService.findOne(id));
+        return forkJoin(obs);
+      }),
+      switchMap((users) => {
+        const obs = users.map((user) => {
+          const newMember = new MemberEntity();
+          newMember.isAdmin = user.id === adminId;
+          newMember.chat = chat;
+          newMember.user = user;
+
+          return from(this.memberRepository.save(newMember));
+        });
+        return forkJoin(obs);
+      }),
+    );
+  }
+
+  public findChatMember(chatId: number, userId: number) {
+    return from(
+      this.memberRepository.findOne({
+        where: { chat: chatId, user: userId },
+        relations: ['chat', 'user'],
+      }),
+    );
   }
 }
