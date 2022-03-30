@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { MemberEntity } from 'src/chat/models/member.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('user')
 export class UserEntity {
@@ -31,4 +32,16 @@ export class UserEntity {
 
   @Column({ type: 'timestamp', default: null })
   deletedAt: Date;
+
+  @OneToMany((type) => MemberEntity, (member) => member.user, {
+    cascade: true,
+  })
+  memberInChats: MemberEntity[];
+
+  addChatMembership(chat: MemberEntity) {
+    if (this.memberInChats == null) {
+      this.memberInChats = Array<MemberEntity>();
+    }
+    this.memberInChats.push(chat);
+  }
 }

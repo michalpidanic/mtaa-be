@@ -1,7 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
-import { catchError, from, map, throwError } from 'rxjs';
+import { catchError, from, map, throwError, lastValueFrom } from 'rxjs';
+import { MemberEntity } from 'src/chat/models/member.entity';
 import { mapUserWithoutPasswordHash } from 'src/common/utils/user-mapper';
 import { Repository } from 'typeorm';
 import { NewUserInterface } from '../interfaces/user.interface';
@@ -49,5 +50,17 @@ export class UserService {
         return res;
       }),
     );
+  }
+
+  public async addChatMembership(member: MemberEntity, userId: number) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    user.addChatMembership(member);
+    return await this.userRepository.save(user);
+    // return from(this.userRepository.findOne({ where: { id: userId } })).pipe(
+    //   tap((user) => console.log(user)),
+    //   tap((user) => user.addChatMembership(member)),
+    //   switchMap(async (user) => await this.userRepository.save(user)),
+    //   tap((user) => console.log(user)),
+    // );
   }
 }
