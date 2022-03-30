@@ -14,16 +14,30 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { createReadStream } from 'fs';
-import { diskStorage } from 'multer';
 import { join } from 'path';
 import { lastValueFrom } from 'rxjs';
+import { FileUploadDto } from '../dtos/file.dto';
 import { FileService } from '../services/file.service';
 
+@ApiTags('File')
 @Controller('file')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
+  @ApiUnauthorizedResponse()
+  @ApiCreatedResponse()
+  @ApiBody({
+    description: 'File',
+    type: FileUploadDto,
+  })
   @UseGuards(AuthGuard('jwt'))
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
@@ -46,6 +60,8 @@ export class FileController {
     );
   }
 
+  @ApiUnauthorizedResponse()
+  @ApiOkResponse()
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   async getFile(

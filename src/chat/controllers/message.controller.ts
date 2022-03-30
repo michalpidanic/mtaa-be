@@ -8,9 +8,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiTags } from '@nestjs/swagger';
 import { EditMessageDto, SendMessageDto } from '../dtos/message.dto';
 import { MessageService } from '../services/message.service';
 
+@ApiTags('Message')
 @Controller('message')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}

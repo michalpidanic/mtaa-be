@@ -10,10 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiTags } from '@nestjs/swagger';
 import { NewChatDto } from '../dtos/chat.dto';
 import { ChatService } from '../services/chat.service';
 import { MessageService } from '../services/message.service';
 
+@ApiTags('Chat')
 @Controller('chat')
 export class ChatController {
   constructor(
