@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
-import { concatMap, from, map } from 'rxjs';
+import { concatMap, forkJoin, from, map, of, switchMap, tap } from 'rxjs';
 import { UserService } from 'src/user/services/user.service';
 import { Repository } from 'typeorm';
 import {
@@ -95,5 +95,47 @@ export class MessageService {
 
   public findOne(messageId: number) {
     return from(this.messageRepository.findOne({ where: { id: messageId } }));
+  }
+
+  public getUsersChats(options: IPaginationOptions, userId: number) {
+    return this.memberService.getMemberships(userId).pipe(
+      concatMap((memberships) => {
+        const obs = memberships.map((membership) =>
+          this.getLastMessage(membership.chat.id),
+        );
+        return forkJoin(obs).pipe(
+          map((lastMessages) => ({ memberships, lastMessages })),
+        );
+      }),
+      map(({ memberships, lastMessages }) => {
+        const chats = memberships;
+        const chatsWithLastMessage = chats.map((chat) => {
+          const message = lastMessages.find(
+            (message) => message?.chat?.id == chat?.chat?.id,
+          );
+          const lastMessage = {
+            text: message?.text ?? 'No messages yet',
+            createdAt: message?.createdAt ?? null,
+          };
+          return { ...chat, lastMessage };
+        });
+        return { chats: chatsWithLastMessage };
+      }),
+    );
+  }
+
+  public getLastMessage(chatId: number) {
+    return from(
+      this.messageRepository.findOne({
+        relations: ['chat'],
+        where: { chat: chatId },
+        order: { id: 'DESC' },
+      }),
+    ).pipe(
+      map((res) => {
+        console.log(res);
+        return res;
+      }),
+    );
   }
 }

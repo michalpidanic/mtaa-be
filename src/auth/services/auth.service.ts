@@ -1,5 +1,6 @@
 import {
   HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -51,17 +52,14 @@ export class AuthService {
             userName: user.userName,
           });
         } else {
-          return new UnauthorizedException('Invalid credentials');
+          throw new UnauthorizedException('Invalid credentials');
         }
       }),
       catchError((err) => {
         console.log(err);
         return throwError(
           () =>
-            new HttpException(
-              err?.response?.data ?? 'Unknown error',
-              err?.response?.status ?? 500,
-            ),
+            new HttpException(err?.data ?? 'Unknown error', err?.status ?? 500),
         );
       }),
     );
@@ -123,6 +121,7 @@ export class AuthService {
       accessToken: accessToken,
       refreshToken: refreshToken,
       userName: payload.userName,
+      userId: payload.userId,
     };
   }
 

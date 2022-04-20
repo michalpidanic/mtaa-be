@@ -57,6 +57,9 @@ export class LoginResponseDto {
 
   @ApiProperty()
   userName: string;
+
+  @ApiProperty()
+  userId: number;
 }
 
 export class RefreshTokenResponseDto {

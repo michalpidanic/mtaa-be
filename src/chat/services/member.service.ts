@@ -48,4 +48,13 @@ export class MemberService {
       }),
     );
   }
+
+  public getMemberships(userId: number) {
+    return from(
+      this.memberRepository.find({
+        where: { user: userId },
+        relations: ['chat', 'user'],
+      }),
+    );
+  }
 }

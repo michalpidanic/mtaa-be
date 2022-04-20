@@ -9,6 +9,6 @@ export class NewChatDto {
 
   @ApiProperty()
   @IsArray()
-  @MinLength(2)
+  // @MinLength(2)
   membersId: number[];
 }

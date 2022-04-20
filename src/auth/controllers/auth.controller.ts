@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -13,6 +14,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { UnauthorizedInterceptor } from 'src/common/interceptors/unauthorized.interceptor';
 import { UserResponseDto } from 'src/user/dtos/user.dto';
 import {
   LoginCredentialsDto,
@@ -35,8 +37,8 @@ export class AuthController {
   }
 
   @ApiOkResponse({ type: LoginResponseDto })
-  @HttpCode(200)
   @Post('login')
+  @UseInterceptors(new UnauthorizedInterceptor('Invalid credentials'))
   login(@Body() credentials: LoginCredentialsDto) {
     return this.authService.login(credentials);
   }
@@ -52,7 +54,6 @@ export class AuthController {
   @ApiOkResponse({ type: RefreshTokenResponseDto })
   @ApiUnauthorizedResponse()
   @UseGuards(AuthGuard('jwt-refresh'))
-  @HttpCode(200)
   @Post('refresh-token')
   refreshToken(@Req() req, @Body() body: RefreshTokenDto) {
     return this.authService.refreshToken(body.refreshToken);
