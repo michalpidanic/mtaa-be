@@ -10,7 +10,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { PaginatedUserResponseDto } from 'src/user/dtos/user.dto';
 import { NewChatDto } from '../dtos/chat.dto';
 import { ChatService } from '../services/chat.service';
 import { MessageService } from '../services/message.service';
@@ -23,6 +29,8 @@ export class ChatController {
     private readonly messageService: MessageService,
   ) {}
 
+  @ApiUnauthorizedResponse()
+  @ApiOkResponse()
   @UseGuards(AuthGuard('jwt'))
   @Post('new')
   createChat(@Req() req, @Body() chatData: NewChatDto) {
@@ -30,6 +38,10 @@ export class ChatController {
     return this.chatService.createChat(creatorId, chatData);
   }
 
+  @ApiUnauthorizedResponse()
+  @ApiOkResponse({})
+  @ApiQuery({ name: 'page' })
+  @ApiQuery({ name: 'limit' })
   @UseGuards(AuthGuard('jwt'))
   @Get(':id/messages')
   fetchMessages(
@@ -43,6 +55,10 @@ export class ChatController {
     });
   }
 
+  @ApiUnauthorizedResponse()
+  @ApiOkResponse({})
+  @ApiQuery({ name: 'page' })
+  @ApiQuery({ name: 'limit' })
   @UseGuards(AuthGuard('jwt'))
   @Get('')
   getChats(
